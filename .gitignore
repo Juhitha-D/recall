@@ -1,0 +1,17 @@
+# secrets and your personal data - never commit these
+.env
+instance/
+
+# Python
+__pycache__/
+*.pyc
+*.egg-info/
+build/
+dist/
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+
+# your personal notes - stays on your computer
+_private/

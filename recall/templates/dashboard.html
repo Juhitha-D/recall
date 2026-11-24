@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Your decks{% endblock %}
+{% block content %}
+<section class="stats">
+  <div class="stat"><b>{{ stats.streak }}</b><span>day streak{{ " 🔥" if stats.streak >= 3 }}</span></div>
+  <div class="stat"><b>{{ stats.today }}</b><span>reviews today</span></div>
+  <div class="stat"><b>{{ "%d%%"|format(stats.retention) if stats.retention is not none else "–" }}</b><span>30-day retention</span></div>
+  <div class="stat chart" aria-label="Reviews in the last 14 days">
+    <div class="bars">
+      {% for h in stats.history %}
+      <div class="bar" style="--h: {{ (100 * h.count / stats.peak) if stats.peak else 0 }}%" title="{{ h.day }}: {{ h.count }} reviews"></div>
+      {% endfor %}
+    </div>
+    <span>last 14 days</span>
+  </div>
+</section>
+
+<div class="row between">
+  <h1>Your decks</h1>
+  <a class="btn" href="{{ url_for('main.new_deck') }}">+ New deck from notes</a>
+</div>
+
+{% if not decks %}
+<div class="empty">
+  <p><b>No decks yet.</b></p>
+  <p class="muted">Upload a PDF of lecture notes or paste some text, and Recall will turn it into flashcards.</p>
+  <a class="btn" href="{{ url_for('main.new_deck') }}">Make your first deck</a>
+</div>
+{% else %}
+<div class="deck-grid">
+  {% for d in decks %}
+  {% set due = d.due or 0 %}{% set new = d.new or 0 %}{% set total = d.total or 0 %}
+  <article class="deck-card">
+    <a class="deck-title" href="{{ url_for('main.deck', deck_id=d.id) }}">{{ d.title }}</a>
+    <p class="muted small">{{ total }} cards · {{ d.mature or 0 }} mastered{% if d.method == "ai" %} · ✨ AI{% endif %}</p>
+    <div class="progress" title="{{ d.mature or 0 }} of {{ total }} cards mastered (interval ≥ 21 days)">
+      <div style="width: {{ (100 * (d.mature or 0) / total) if total else 0 }}%"></div>
+    </div>
+    <div class="row between">
+      <span class="pills">
+        {% if due %}<span class="pill due">{{ due }} due</span>{% endif %}
+        {% if new %}<span class="pill new">{{ new }} new</span>{% endif %}
+        {% if not due and not new %}<span class="pill done">all caught up</span>{% endif %}
+      </span>
+      {% if due or (new and new_left) %}
+      <a class="btn small" href="{{ url_for('main.study', deck_id=d.id) }}">Study</a>
+      {% endif %}
+    </div>
+  </article>
+  {% endfor %}
+</div>
+{% if not new_left %}<p class="muted small">You've reached today's limit of new cards. More unlock tomorrow; reviews are always available.</p>{% endif %}
+{% endif %}
+{% endblock %}

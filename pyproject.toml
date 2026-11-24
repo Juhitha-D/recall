@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "recall"
+version = "1.0.0"
+description = "Turn study notes into flashcards with AI, then remember them with SM-2 spaced repetition."
+readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "Juhitha" }]
+requires-python = ">=3.10"
+dependencies = ["flask>=3.0", "pypdf>=4.0", "scikit-learn>=1.4", "requests>=2.31"]
+keywords = ["flashcards", "spaced-repetition", "sm2", "llm", "flask", "study"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "ruff>=0.5", "reportlab>=4.0"]
+
+[project.urls]
+Homepage = "https://github.com/Juhitha-D/recall"
+
+[project.scripts]
+recall = "recall.cli:main"
+
+[tool.setuptools]
+packages = ["recall"]
+
+[tool.setuptools.package-data]
+recall = ["templates/*.html", "static/*"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["tests"]

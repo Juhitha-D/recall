@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}New deck{% endblock %}
+{% block main_class %}narrow{% endblock %}
+{% block content %}
+<h1>New deck from your notes</h1>
+<p class="muted">
+  {% if ai %}Cards are written by AI ({{ ai }}).{% else %}No AI key set, so the offline generator will make definition and fill-in-the-blank cards. Add a key in <code>.env</code> for smarter cards.{% endif %}
+</p>
+<form method="post" enctype="multipart/form-data" class="card-box" id="new-deck">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <label><span>Deck title <span class="muted">(optional)</span></span>
+    <input name="title" maxlength="120" placeholder="e.g. Networks – Week 3" value="{{ request.form.title or '' }}">
+  </label>
+  <label class="drop">Upload notes (PDF, TXT or Markdown)
+    <input type="file" name="file" accept=".pdf,.txt,.md,.markdown">
+  </label>
+  <div class="or"><span>or paste them</span></div>
+  <label><textarea name="text" rows="9" placeholder="Paste lecture notes, a textbook section, your own summary…">{{ request.form.text or '' }}</textarea></label>
+  <label><span>How many cards? <span class="muted" id="count-out">{{ request.form.count or 20 }}</span></span>
+    <input type="range" name="count" min="5" max="{{ max_cards }}" step="5" value="{{ request.form.count or 20 }}"
+           oninput="document.getElementById('count-out').textContent = this.value">
+  </label>
+  <button class="btn" id="make">Make flashcards</button>
+</form>
+{% endblock %}
+{% block scripts %}
+<script>
+  document.getElementById("new-deck").addEventListener("submit", () => {
+    const b = document.getElementById("make");
+    b.disabled = true; b.textContent = "Reading your notes…";
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}{{ deck.title }}{% endblock %}
+{% block content %}
+<div class="row between">
+  <form method="post" action="{{ url_for('main.rename_deck', deck_id=deck.id) }}" class="rename">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input name="title" value="{{ deck.title }}" maxlength="120" aria-label="Deck title" class="title-input">
+  </form>
+  <div class="row">
+    <a class="btn ghost small" href="{{ url_for('main.export_deck', deck_id=deck.id) }}" title="CSV with question,answer columns; imports into Anki">Export CSV</a>
+    <a class="btn" href="{{ url_for('main.study', deck_id=deck.id) }}">Study{% if due %} ({{ due }} due){% endif %}</a>
+  </div>
+</div>
+<p class="muted small">From {{ deck.source_name or "manual entry" }} · {{ cards|length }} cards · click any card to edit it</p>
+
+<div class="card-list">
+  {% for c in cards %}
+  <form method="post" action="{{ url_for('main.edit_card', card_id=c.id) }}" class="card-row" id="card-{{ c.id }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <span class="num">{{ loop.index }}</span>
+    <textarea name="front" rows="2" required aria-label="Question">{{ c.front }}</textarea>
+    <textarea name="back" rows="2" required aria-label="Answer">{{ c.back }}</textarea>
+    <div class="card-actions">
+      {% if c.due %}<span class="pill small-pill" title="ease {{ c.ease }}">{{ c.interval }}d</span>{% else %}<span class="pill new small-pill">new</span>{% endif %}
+      <button class="link save">Save</button>
+      <button class="link danger" formaction="{{ url_for('main.delete_card', card_id=c.id) }}"
+              onclick="return confirm('Delete this card?')">Delete</button>
+    </div>
+  </form>
+  {% endfor %}
+</div>
+
+<form method="post" action="{{ url_for('main.add_card', deck_id=deck.id) }}" class="card-row add" id="add">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <span class="num">+</span>
+  <textarea name="front" rows="2" placeholder="New question" required></textarea>
+  <textarea name="back" rows="2" placeholder="Answer" required></textarea>
+  <div class="card-actions"><button class="btn small">Add card</button></div>
+</form>
+
+<form method="post" action="{{ url_for('main.delete_deck', deck_id=deck.id) }}" class="danger-zone"
+      onsubmit="return confirm('Delete this deck and all its cards? This cannot be undone.')">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <button class="link danger">Delete deck</button>
+</form>
+{% endblock %}

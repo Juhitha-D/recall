@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}{{ "Create account" if mode == "register" else "Log in" }}{% endblock %}
+{% block main_class %}narrow{% endblock %}
+{% block content %}
+<div class="hero">
+  <h1>Remember what you study.</h1>
+  <p class="muted">Upload your notes, get flashcards, and review each card right before you'd forget it.</p>
+</div>
+<form method="post" class="card-box">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <h2>{{ "Create your account" if mode == "register" else "Welcome back" }}</h2>
+  <label>Email <input type="email" name="email" required autofocus value="{{ request.form.email or '' }}"></label>
+  <label>Password
+    <input type="password" name="password" required minlength="{{ 8 if mode == 'register' else 1 }}"
+           autocomplete="{{ 'new-password' if mode == 'register' else 'current-password' }}">
+  </label>
+  <button class="btn">{{ "Create account" if mode == "register" else "Log in" }}</button>
+  {% if mode == "register" %}
+  <p class="muted small">Already have an account? <a href="{{ url_for('auth.login') }}">Log in</a></p>
+  {% else %}
+  <p class="muted small">New here? <a href="{{ url_for('auth.register') }}">Create an account</a></p>
+  {% endif %}
+</form>
+{% endblock %}

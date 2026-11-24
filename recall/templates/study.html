@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Study{% endblock %}
+{% block main_class %}study{% endblock %}
+{% block content %}
+<div class="study-head">
+  <span class="muted">{{ deck.title if deck else "All decks" }}</span>
+  <span class="counts"><span class="pill due" id="due-n">0</span> due · <span class="pill new" id="new-n">0</span> new</span>
+</div>
+
+<div id="stage">
+  <div class="flashcard" id="flashcard" hidden>
+    <p class="deck-tag" id="deck-tag"></p>
+    <div class="front" id="front"></div>
+    <hr id="divider" hidden>
+    <div class="back" id="back" hidden></div>
+  </div>
+
+  <div id="controls" hidden>
+    <button class="btn wide" id="show">Show answer <kbd>Space</kbd></button>
+    <div class="ratings" id="ratings" hidden>
+      <button data-r="again" class="r again">Again<small id="p-again"></small><kbd>1</kbd></button>
+      <button data-r="hard" class="r hard">Hard<small id="p-hard"></small><kbd>2</kbd></button>
+      <button data-r="good" class="r good">Good<small id="p-good"></small><kbd>3</kbd></button>
+      <button data-r="easy" class="r easy">Easy<small id="p-easy"></small><kbd>4</kbd></button>
+    </div>
+  </div>
+
+  <div class="done-screen" id="done" hidden>
+    <p class="big">🎉</p>
+    <h2>All done for now</h2>
+    <p class="muted" id="done-msg"></p>
+    <a class="btn" href="{{ url_for('main.dashboard') }}">Back to decks</a>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>window.RECALL_DECK = {{ deck.id if deck else "null" }};</script>
+<script src="{{ url_for('static', filename='study.js') }}"></script>
+{% endblock %}
