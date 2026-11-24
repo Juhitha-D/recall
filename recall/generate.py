@@ -11,6 +11,7 @@ generator still produces useful cards:
 from __future__ import annotations
 
 import json
+import logging
 import os
 import re
 from dataclasses import dataclass
@@ -21,6 +22,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from .extract import chunks, split_sentences
 
 MAX_CARDS = 60
+log = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -84,7 +86,7 @@ def _call_llm(prompt: str) -> str:
 
 def parse_cards(raw: str) -> list[Card]:
     """Pull a JSON array of cards out of model output, ignoring junk entries."""
-    m = re.search(r"\[.*\]", raw, re.S)
+    m = re.search(r"\[.*\]", raw, re.DOTALL)
     if not m:
         raise ValueError("no JSON array in model output")
     cards = []
@@ -138,7 +140,7 @@ def _definition_card(s: str) -> Card | None:
             continue
         verb = m.groupdict().get("verb") or "is"
         # "X is a/an/the ..." reads as a definition; "X are 32 bits long" doesn't.
-        if pattern is _DEF and verb in ("is", "are") and not re.match(r"(a|an|the|one)\b", rest, re.I):
+        if pattern is _DEF and verb in ("is", "are") and not re.match(r"(a|an|the|one)\b", rest, re.IGNORECASE):
             continue
         article = (m.groupdict().get("article") or "").strip().lower()
         if pattern is _GLOSSARY and not term.isupper():
@@ -155,7 +157,7 @@ def _is_specific(term: str, text: str) -> bool:
     """Worth blanking out: a phrase, an acronym, a hyphenated or long technical word."""
     if " " in term or "-" in term:
         return True
-    original = re.search(rf"\b{re.escape(term)}\b", text, re.I)
+    original = re.search(rf"\b{re.escape(term)}\b", text, re.IGNORECASE)
     return bool(original and re.search(r"[A-Z0-9]", original.group(0)[1:] or original.group(0)) and original.group(0) != original.group(0).capitalize())
 
 
@@ -189,7 +191,7 @@ def rule_cards(text: str, limit: int) -> list[Card]:
             used.add(i)
 
     for term in _key_terms(sentences, top=limit):
-        pat = re.compile(rf"\b{re.escape(term)}\b", re.I)
+        pat = re.compile(rf"\b{re.escape(term)}\b", re.IGNORECASE)
         for i, s in enumerate(sentences):
             if i in used or not _ok_sentence(s) or not s.endswith("."):
                 continue
@@ -220,6 +222,7 @@ def generate_cards(text: str, limit: int = 30) -> tuple[list[Card], str]:
             cards = dedupe(llm_cards(text, limit))[:limit]
             if cards:
                 return cards, "ai"
-        except Exception:
-            pass  # network / quota / bad JSON: fall back to rules
+        except (requests.RequestException, OSError, ValueError, KeyError, TypeError) as exc:
+            # network down, bad key, quota, or the model returned unusable JSON
+            log.warning("AI card generation failed (%s); using the offline generator", type(exc).__name__)
     return dedupe(rule_cards(text, limit))[:limit], "rules"

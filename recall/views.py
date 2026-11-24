@@ -6,8 +6,7 @@ import io
 from collections import Counter
 from datetime import datetime, timedelta, timezone
 
-from flask import (Blueprint, Response, abort, current_app, flash, g, redirect, render_template, request,
-                   url_for)
+from flask import Blueprint, Response, abort, current_app, flash, g, redirect, render_template, request, url_for
 
 from .auth import login_required
 from .db import get_db, state_of, ts

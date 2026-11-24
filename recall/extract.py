@@ -39,7 +39,7 @@ def extract_text(filename: str, data: bytes) -> str:
 def clean(text: str) -> str:
     text = text.replace("\r\n", "\n").replace("\r", "\n").replace("­", "")
     text = re.sub(r"(\w)-\n(\w)", r"\1\2", text)  # re-join words hyphenated across lines
-    text = re.sub(r"^\s*(page\s*)?\d+\s*(of\s*\d+)?\s*$", "", text, flags=re.I | re.M)  # page numbers
+    text = re.sub(r"^\s*(page\s*)?\d+\s*(of\s*\d+)?\s*$", "", text, flags=re.IGNORECASE | re.MULTILINE)  # page numbers
     text = re.sub(r"[ \t]+", " ", text)
     text = re.sub(r"\n{3,}", "\n\n", text)
     return text.strip()

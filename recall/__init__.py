@@ -31,7 +31,7 @@ def create_app(test_config: dict | None = None) -> Flask:
     app.config.update(
         DATABASE=str(instance / "recall.sqlite"),
         MAX_CONTENT_LENGTH=16 * 1024 * 1024,
-        NEW_CARDS_PER_DAY=int(os.getenv("NEW_CARDS_PER_DAY", 20)),
+        NEW_CARDS_PER_DAY=int(os.getenv("NEW_CARDS_PER_DAY", "20")),
         SESSION_COOKIE_HTTPONLY=True,
         SESSION_COOKIE_SAMESITE="Lax",
     )

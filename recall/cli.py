@@ -11,7 +11,7 @@ from . import __version__, create_app
 
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(prog="recall", description="Run the Recall flashcard app locally.")
-    p.add_argument("--port", type=int, default=int(os.getenv("PORT", 5000)))
+    p.add_argument("--port", type=int, default=int(os.getenv("PORT", "5000")))
     p.add_argument("--no-browser", action="store_true", help="don't open a browser tab")
     p.add_argument("--version", action="version", version=f"recall {__version__}")
     args = p.parse_args(argv)
